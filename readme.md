@@ -73,10 +73,10 @@ This tool generates high-resolution images using the Unsplash API with a centere
 
 To tailor the script to your needs, such as changing the image resolution, logo, or output directory, you can modify the following variables in `generate.py`:
 
-- **Resolution:** The default resolution is set to `2560 x 1600` to match MacBook M1 screens. To change it, adjust the `WALLPAPER_SIZE` variable.
+- **Resolution:** The default resolution is set to `2560 x 1600` to match MacBook M1 screens. To change it, adjust the `IMAGE_SIZE` variable.
 
     ```python
-    WALLPAPER_SIZE = (2560, 1600)  # Adjust to desired dimensions
+    IMAGE_SIZE = (2560, 1600)  # Adjust to desired dimensions
     ```
 
 - **Logo:** To change the logo that is superimposed on each image, modify the `LOGO_PATH` variable to the path of your logo image.
