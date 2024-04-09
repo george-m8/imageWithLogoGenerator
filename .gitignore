@@ -4,5 +4,6 @@ venv/
 # Ignore the contents of the output and logo directories
 output/*
 logos/*
+!logos/example_logo.png
 
 .DS_Store
