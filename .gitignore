@@ -1,0 +1,5 @@
+# Ignore virtual environment directory
+venv/
+
+# Ignore the contents of the output directory
+output/*
