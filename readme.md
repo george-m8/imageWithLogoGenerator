@@ -96,7 +96,8 @@ To tailor the script to your needs, such as changing the image resolution, logo,
 - [ ] **Include Photographer Credit:** Future updates will add the photographer's name and profile URL from Unsplash as a credit in the image's bottom right corner.
 - [ ] **Customization Options:** Expand customization options, including different placements for the logo and selectable text fonts for credits.
 - [ ] **Ensure API Usage Meets Guidelines:** Ensure that images are downloaded correctly using the API and correct calls to gain production API license.
-- [ ] **Automatically Choose Logo Based On Image Colours:** Logo should be black or white if more legible on image.
+- [ ] **Automatically Select Logo Based on Image Colours:** Logo should be black or white if more legible on image.
+- [ ] **Add Random Seed for Images:** Images currently not random - if same query used, same images are generated. Need to add some sort of random seed to search query to avoid this or log used images.
 
 ## License
 
