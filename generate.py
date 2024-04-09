@@ -4,14 +4,15 @@ import requests
 from PIL import Image, ImageOps # type: ignore
 from io import BytesIO
 
+# User configurable variables:
+LOGO_PATH = './logos/white.png' # Path to your logo within 'logos' directory
+
+IMAGE_SIZE = (2560, 1600) # Desired image size (width, height) in pixels
+
+IMAGE_SAVE_LOCATION = './output/' # Output directory for the processed images
+
 # Add your Unsplash access key as an environment variable.
 UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
-# Path to your logo within 'logos' directory
-LOGO_PATH = './logos/white.png'
-# Desired image size (width, height) in pixels
-IMAGE_SIZE = (2560, 1600)
-# Output directory for the processed images
-IMAGE_SAVE_LOCATION = './output/'
 
 def download_unsplash_images(query=None, total=1):
     """Download images from Unsplash."""
