@@ -4,5 +4,9 @@ venv/
 # Ignore the contents of the output and logo directories
 output/*
 logos/*
+output*/*
+
+# Ignore the logfile
+logfile.*
 
 .DS_Store

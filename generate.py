@@ -3,6 +3,10 @@ import os
 import requests
 from PIL import Image, ImageOps # type: ignore
 from io import BytesIO
+import logging
+
+# Set up logging config
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[logging.StreamHandler(), logging.FileHandler('logfile.log')])
 
 # User configurable variables:
 LOGO_PATH = './logos/white.png' # Path to your logo within 'logos' directory
@@ -13,6 +17,16 @@ IMAGE_SAVE_LOCATION = './output/' # Output directory for the processed images
 
 # Add your Unsplash access key as an environment variable.
 UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
+#print(UNSPLASH_ACCESS_KEY)
+
+# Calculate params from user config vars
+if IMAGE_SIZE[0] > IMAGE_SIZE[1]:
+    orientation = 'landscape'
+elif IMAGE_SIZE[0] < IMAGE_SIZE[1]:
+    orientation = 'portrait'
+else:
+    orientation = 'squareish'
+logging.debug(f"Image orientation: {orientation}")
 
 def download_unsplash_images(query=None, total=1):
     """Download images from Unsplash."""
@@ -20,11 +34,17 @@ def download_unsplash_images(query=None, total=1):
     if query:
         url = f"https://api.unsplash.com/search/photos?page=1&query={query}&per_page={total}"
         response = requests.get(url, headers=headers).json()
+        if 'errors' in response:
+            print(response['errors'])
+            return []
         images = [img["urls"]["regular"] for img in response["results"]]
     else:
         # Request for random images when no query is specified
         url = f"https://api.unsplash.com/photos/random?count={total}"
         response = requests.get(url, headers=headers).json()
+        if 'errors' in response:
+            print(response['errors'])
+            return []
         # Handle single or multiple random images
         if total == 1:
             images = [response["urls"]["regular"]] if isinstance(response, dict) else [img["urls"]["regular"] for img in response]
