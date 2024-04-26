@@ -5,6 +5,7 @@ venv/
 output/*
 logos/*
 output*/*
+!logos/example_logo.png
 
 # Ignore the logfile
 logfile.*

@@ -1,7 +1,8 @@
 import argparse
 import os
 import requests
-from PIL import Image, ImageOps # type: ignore
+from typing import List
+from PIL import Image, ImageOps, ImageFilter # type: ignore
 from io import BytesIO
 import logging
 
@@ -9,7 +10,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', handlers=[logging.StreamHandler(), logging.FileHandler('logfile.log')])
 
 # User configurable variables:
-LOGO_PATH = './logos/white.png' # Path to your logo within 'logos' directory
+LOGO_PATH = './logos/example_logo.png' # Path to your logo within 'logos' directory
 
 IMAGE_SIZE = (2560, 1600) # Desired image size (width, height) in pixels
 
@@ -28,7 +29,7 @@ else:
     orientation = 'squareish'
 logging.debug(f"Image orientation: {orientation}")
 
-def download_unsplash_images(query=None, total=1):
+def query_unsplash_image_urls(query=None, total=1) -> List[str]:
     """Download images from Unsplash."""
     headers = {'Authorization': f'Client-ID {UNSPLASH_ACCESS_KEY}'}
     if query:
@@ -52,17 +53,28 @@ def download_unsplash_images(query=None, total=1):
             images = [img["urls"]["regular"] for img in response]
     return images
 
-def process_image(image_url):
-    """Crop, resize, and add logo to the image."""
-    # Download image
+def download_unsplash_image(image_url) -> Image.Image:
+    """Download the image from the URL."""
     response = requests.get(image_url)
     image = Image.open(BytesIO(response.content))
+    return image
+
+def process_image(image: Image.Image, bg_blur: float = 0.) -> Image.Image:
+    """Crop, resize, and add logo to the image.
     
+    Args:
+        bg_blur: float - The amount of blur to apply to the background
+          image (default: 0.)
+    """    
     # Crop to the desired aspect ratio
     image = ImageOps.fit(image, IMAGE_SIZE, Image.Resampling.LANCZOS, 0, (0.5, 0.5))
     
     # Resize image
     image = image.resize(IMAGE_SIZE, Image.Resampling.LANCZOS)
+
+    # Add blur effect
+    if bg_blur > 0:
+        image = image.filter(ImageFilter.GaussianBlur(radius=bg_blur))
     
     # Add logo
     logo = Image.open(LOGO_PATH).convert("RGBA")
@@ -74,18 +86,16 @@ def save_image(image, base_name, idx):
     """Save the processed image, avoiding overwrites."""
     # Ensure the output directory exists
     os.makedirs(IMAGE_SAVE_LOCATION, exist_ok=True)
-    
-    filename = f"{base_name}_{idx}.png"
-    counter = idx
-    # Construct the full path with the directory
-    full_path = os.path.join(IMAGE_SAVE_LOCATION, filename)
-    
-    # Check if the file already exists and iterate the number if needed
-    while os.path.exists(full_path):
-        counter += 1
-        filename = f"{base_name}_{counter}.png"
-        full_path = os.path.join(IMAGE_SAVE_LOCATION, filename)
-    
+
+    def construct_filepath(base_name, counter):
+        while True:
+            counter += 1
+            filename = f"{base_name}_{counter}.png"
+            full_path = os.path.join(IMAGE_SAVE_LOCATION, filename)
+            if not os.path.exists(full_path):
+                return filename, full_path
+            
+    filename, full_path = construct_filepath(base_name, idx)
     image.save(full_path)
     return filename
 
@@ -93,12 +103,15 @@ def main():
     parser = argparse.ArgumentParser(description="Generate images with a logo.")
     parser.add_argument("total", nargs='?', type=int, default=1, help="Number of images to generate (default: 1)")
     parser.add_argument("query", nargs='?', type=str, default=None, help="Search query for Unsplash (default: random)")
+    parser.add_argument("--bg_blur", type=float, default=0., help="Amount of blur to apply to the background image (default: 0.)")
     args = parser.parse_args()
     
-    images = download_unsplash_images(args.query, args.total)
-    for idx, img_url in enumerate(images):
+    images_urls = query_unsplash_image_urls(args.query, args.total)
+    
+    for idx, img_url in enumerate(images_urls):
         try:
-            processed_image = process_image(img_url)
+            image = download_unsplash_image(img_url)
+            processed_image = process_image(image, bg_blur=args.bg_blur)
             # If no query is specified, use a generic name.
             base_name = f"image_{args.query if args.query else 'noQuery'}"
             saved_filename = save_image(processed_image, base_name, idx+1)
